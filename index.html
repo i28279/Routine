@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <title>Study Routine Planner</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #e0e0e0;
+      padding: 20px;
+    }
+    h1 { text-align:center; margin-bottom:20px; }
+    table { width:100%; border-collapse:collapse; margin-top:20px; }
+    th, td { border:1px solid #ccc; padding:8px; text-align:center; }
+    th { background:#333; color:#fff; }
+    button {
+      padding:5px 10px;
+      border:none;
+      border-radius:12px;
+      background:#e0e0e0;
+      box-shadow: 4px 4px 8px #bebebe, -4px -4px 8px #ffffff;
+      cursor:pointer;
+      transition: all 0.2s;
+    }
+    button:active {
+      box-shadow: inset 4px 4px 8px #bebebe, inset -4px -4px 8px #ffffff;
+    }
+    #progress, #countdown, #dailyTarget {
+      margin-top:15px; 
+      font-weight:bold;
+      text-align:center;
+      padding:10px;
+      border-radius:12px;
+      background:#e0e0e0;
+      box-shadow: 8px 8px 16px #bebebe, -8px -8px 16px #ffffff;
+    }
+    input[type="date"] {
+      padding:5px;
+      border-radius:12px;
+      border:none;
+      box-shadow: inset 4px 4px 8px #bebebe, inset -4px -4px 8px #ffffff;
+    }
+  </style>
+</head>
+<body>
+  <h1>📚 Study Routine Planner</h1>
+
+  <label>📅 Select End Date: </label>
+  <input type="date" id="endDate" onchange="saveEndDate()">
+
+  <div id="progress">Completed: 0 / 44 chapters</div>
+  <div id="dailyTarget">Daily Target: -- chapters/day</div>
+  <div id="countdown">Countdown: -- days left</div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Day</th>
+        <th>Chapter Name</th>
+        <th>Done</th>
+      </tr>
+    </thead>
+    <tbody id="routineTable"></tbody>
+  </table>
+<script>
+    const easy = [
+      "ভৌত জগৎ","আদর্শ গ্যাস","সরল দোলন গতি","অভিকর্ষ","বল ও ঘর্ষণ","শিশিরাঙ্ক/আদ্রতা",
+      "হাউজ ওয়ারিং","বৈদ্যুতিক নিয়ন্ত্রক","বৈদ্যুতিক তার ও ক্যাবল","বৈদ্যুতিক রক্ষণ",
+      "বৈদ্যুতিক আর্থিং","আধুনিক বৈদ্যুতিক বাতি","ইলেট্রোমেগনেটিজম","ইলেক্ট্রোম্যাগনেটিক ইনডাকশন",
+      "নির্ণায়ক","ম্যাট্রিক্স","জটিল সংখ্যা","সরলরেখা","বৃত্ত","দৈর্ঘ্য এবং ক্ষেত্রফল"
+    ];
+    const hard = [
+      "ভেক্টর","গতি ও গতির সমীকরণ","কাজ ক্ষমতা ও শক্তি","বৃত্তাকার গতি","স্থিতিস্থাপকতা","পৃষ্ঠটান ও সান্দ্রতা",
+      "তরঙ্গ","শব্দ ও শব্দের বেগ","চাপ ও চাপের বৈশিষ্ট্য","বৈদ্যুতিক ক্ষমতা","বৈদ্যুতি বর্তনী","ওহমের সূত্র",
+      "ক্যাপাসিটর","পরিবাহী","ইলেক্ট্রিসিটি এর প্রকৃতি","বহুপদী","বিন্যাস","সমাবেশ","সংযুক্ত কোণ","ত্রিকোণমিতি",
+      "রূপান্তর সূত্র","গুণিতক কাণ","বিপরীত বৃত্তীয় ফাংশন","ত্রিভুজের ত্রিকোণমিতি"
+    ];
+
+    const chapters = [...easy, ...hard];
+    const totalChapters = chapters.length;
+
+    let completedChapters = JSON.parse(localStorage.getItem("completedChapters")) || [];
+
+    const tbody = document.getElementById("routineTable");
+
+    // টেবিল জেনারেট
+    chapters.forEach((ch, i) => {
+      const tr = document.createElement("tr");
+      const doneBtn = completedChapters.includes(i) 
+                      ? <button disabled>✔</button> 
+                      : <button onclick="markDone(${i}, this)">Done</button>;
+      tr.innerHTML = `
+        <td>Day ${i+1}</td>
+        <td>${ch}</td>
+        <td>${doneBtn}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    updateProgressDisplay();
+
+    function markDone(index, btn){
+      btn.disabled = true;
+      btn.innerText = "✔";
+      if(!completedChapters.includes(index)){
+        completedChapters.push(index);
+        localStorage.setItem("completedChapters", JSON.stringify(completedChapters));
+      }
+      updateProgressDisplay();
+    }
+
+    function updateProgressDisplay(){
+      document.getElementById("progress").innerText = Completed: ${completedChapters.length} / ${totalChapters} chapters;
+      updateDailyTarget();
+    }
+
+    function updateDailyTarget(){
+      const endDateValue = document.getElementById("endDate").value;
+      if(!endDateValue) return;
+      const endDate = new Date(endDateValue + "T23:59:59");
+      const now = new Date();
+      const diffTime = endDate - now;
+      const diffDays = Math.ceil(diffTime / (1000*60*60*24));
+      const dailyTarget = diffDays > 0 ? (totalChapters - completedChapters.length) / diffDays : 0;
+      document.getElementById("dailyTarget").innerText = Daily Target: ${dailyTarget.toFixed(2)} chapters/day;
+    }
+
+    let countdownInterval;
+    function startCountdown(){
+      clearInterval(countdownInterval);
+      const endDateValue = document.getElementById("endDate").value;
+      if(!endDateValue) return;
+
+      const endDate = new Date(endDateValue + "T23:59:59");
+
+      countdownInterval = setInterval(() => {
+        const now = new Date();
+        const diff = endDate - now;
+
+        if(diff <= 0){
+          clearInterval(countdownInterval);
+          document.getElementById("countdown").innerText = Countdown: 0d 0h 0m 0s;
+          return;
+        }
+
+        const days = Math.floor(diff / (1000*60*60*24));
+        const hours = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+        const minutes = Math.floor((diff % (1000*60*60)) / (1000*60));
+        const seconds = Math.floor((diff % (1000*60)) / 1000);
+
+        document.getElementById("countdown").innerText =
+          Countdown: ${days}d ${hours}h ${minutes}m ${seconds}s;
+
+        updateDailyTarget();
+      }, 1000);
+    }
+
+    function saveEndDate(){
+      const value = document.getElementById("endDate").value;
+      localStorage.setItem("endDate", value);
+      startCountdown();
+    }
+
+    // page load এ saved end date থাকলে auto set এবং countdown start
+    window.addEventListener("load", () => {
+      const savedEndDate = localStorage.getItem("endDate");
+      if(savedEndDate){
+        document.getElementById("endDate").value = savedEndDate;
+        startCountdown();
+      }
+    });
+  </script>
+</body>
+</html>
