@@ -62,7 +62,8 @@
     </thead>
     <tbody id="routineTable"></tbody>
   </table>
-<script>
+
+  <script>
     const easy = [
       "ভৌত জগৎ","আদর্শ গ্যাস","সরল দোলন গতি","অভিকর্ষ","বল ও ঘর্ষণ","শিশিরাঙ্ক/আদ্রতা",
       "হাউজ ওয়ারিং","বৈদ্যুতিক নিয়ন্ত্রক","বৈদ্যুতিক তার ও ক্যাবল","বৈদ্যুতিক রক্ষণ",
@@ -87,8 +88,8 @@
     chapters.forEach((ch, i) => {
       const tr = document.createElement("tr");
       const doneBtn = completedChapters.includes(i) 
-                      ? <button disabled>✔</button> 
-                      : <button onclick="markDone(${i}, this)">Done</button>;
+                      ? `<button disabled>✔</button>` 
+                      : `<button onclick="markDone(${i}, this)">Done</button>`;
       tr.innerHTML = `
         <td>Day ${i+1}</td>
         <td>${ch}</td>
@@ -110,7 +111,7 @@
     }
 
     function updateProgressDisplay(){
-      document.getElementById("progress").innerText = Completed: ${completedChapters.length} / ${totalChapters} chapters;
+      document.getElementById("progress").innerText = `Completed: ${completedChapters.length} / ${totalChapters} chapters`;
       updateDailyTarget();
     }
 
@@ -122,7 +123,7 @@
       const diffTime = endDate - now;
       const diffDays = Math.ceil(diffTime / (1000*60*60*24));
       const dailyTarget = diffDays > 0 ? (totalChapters - completedChapters.length) / diffDays : 0;
-      document.getElementById("dailyTarget").innerText = Daily Target: ${dailyTarget.toFixed(2)} chapters/day;
+      document.getElementById("dailyTarget").innerText = `Daily Target: ${dailyTarget.toFixed(2)} chapters/day`;
     }
 
     let countdownInterval;
@@ -139,7 +140,7 @@
 
         if(diff <= 0){
           clearInterval(countdownInterval);
-          document.getElementById("countdown").innerText = Countdown: 0d 0h 0m 0s;
+          document.getElementById("countdown").innerText = `Countdown: 0d 0h 0m 0s`;
           return;
         }
 
@@ -149,7 +150,7 @@
         const seconds = Math.floor((diff % (1000*60)) / 1000);
 
         document.getElementById("countdown").innerText =
-          Countdown: ${days}d ${hours}h ${minutes}m ${seconds}s;
+          `Countdown: ${days}d ${hours}h ${minutes}m ${seconds}s`;
 
         updateDailyTarget();
       }, 1000);
